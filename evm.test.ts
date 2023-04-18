@@ -1,6 +1,6 @@
 import { expect, test } from "@jest/globals";
 import evm from "./evm";
-import tests from "../evm.json";
+import tests from "./evm.json";
 
 for (const t of tests as any) {
   test(t.name, () => {
