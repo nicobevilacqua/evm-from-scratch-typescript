@@ -159,6 +159,15 @@ export default function evm(code: Uint8Array): Result {
     // SIGNEXTEND
     else if (opcode === 0x0b) {
       // TODO
+      // https://ethereum.stackexchange.com/questions/63062/evm-signextend-opcode-explanation
+      const x = stack.shift();
+      const b = stack.shift();
+      console.log(b, x);
+      if (b >= 0) {
+        stack.unshift(b);
+      } else {
+        // negative
+      }
     }
 
     // SDIV
@@ -169,6 +178,78 @@ export default function evm(code: Uint8Array): Result {
       if (b != 0) {
         result = a / b;
       }
+
+      stack.unshift(result);
+    }
+
+    // SMOD
+    else if (opcode === 0x07) {
+      const a = stack.shift();
+      const b = stack.shift();
+      let result = BigInt(0);
+      if (b != 0) {
+        result = a % b;
+      }
+
+      stack.unshift(result);
+    }
+
+    // LT
+    else if (opcode === 0x10) {
+      const a = stack.shift();
+      const b = stack.shift();
+      const result = a < b ? BigInt(1) : BigInt(0);
+
+      stack.unshift(result);
+    }
+
+    // SLT
+    else if (opcode === 0x11) {
+      const a = stack.shift();
+      const b = stack.shift();
+      const result = a > b ? BigInt(1) : BigInt(0);
+
+      stack.unshift(result);
+    }
+
+    // EQ
+    else if (opcode === 0x14) {
+      const a = stack.shift();
+      const b = stack.shift();
+      const result = a === b ? BigInt(1) : BigInt(0);
+
+      stack.unshift(result);
+    }
+
+    // ISZERO
+    else if (opcode === 0x15) {
+      const a = stack.shift();
+      const result = a == 0 ? BigInt(1) : BigInt(0);
+
+      stack.unshift(result);
+    }
+
+    // NOT
+    else if (opcode === 0x0f) {
+      const a = stack.shift();
+
+      stack.unshift(~a);
+    }
+
+    // AND
+    else if (opcode === 0x16) {
+      const a = stack.shift();
+      const b = stack.shift();
+      const result = a & b;
+
+      stack.unshift(result);
+    }
+
+    // OR
+    else if (opcode === 0x17) {
+      const a = stack.shift();
+      const b = stack.shift();
+      const result = a | b;
 
       stack.unshift(result);
     }
