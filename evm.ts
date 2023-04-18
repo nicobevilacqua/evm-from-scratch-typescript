@@ -17,6 +17,9 @@ type Result = {
   stack: bigint[];
 };
 
+const MAX_UINT =
+  BigInt(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
+
 export default function evm(code: Uint8Array): Result {
   let pc = 0;
   let stack: bigint[] = [];
@@ -25,27 +28,98 @@ export default function evm(code: Uint8Array): Result {
     const opcode = code[pc];
     pc++;
 
-    // push0
+    // PUSH0
     if (opcode === 0x5f) {
-      stack.push(BigInt(0));
+      stack.unshift(BigInt(0));
+    }
+
+    // PUSHX opcodes
+    else if (opcode > 0x5f && opcode <= 0x7f) {
+      let i = opcode - 0x5f;
+
+      let word = "";
+      while (i > 0) {
+        word += BigInt(code[pc]).toString(16);
+        pc++;
+        --i;
+      }
+
+      pc--; // workaround
+
+      stack.unshift(BigInt("0x" + word));
+    }
+
+    // POP
+    else if (opcode === 0x50) {
+      stack.shift();
+    }
+
+    // ADD
+    else if (opcode === 0x01) {
+      const a = stack.shift();
+      const b = stack.shift();
+      let result = a + b;
+      if (result > MAX_UINT) {
+        result -= MAX_UINT;
+      }
+
+      stack.unshift(result);
+    }
+
+    // STOP
+    else if (opcode === 0x00) {
       break;
     }
 
-    // pushX opcodes
-    if (opcode >= 0x5f && opcode <= 0x7f) {
-      const i = opcode - 0x5f;
-
-      console.log("i", i);
-
-      let word = "";
-      while (pc <= i) {
-        word += BigInt(code[pc]).toString(16);
-        pc++;
+    // MUL
+    else if (opcode === 0x02) {
+      const a = stack.shift();
+      const b = stack.shift();
+      let result = a * b;
+      if (result > MAX_UINT) {
+        result -= MAX_UINT;
       }
 
-      console.log("word", word);
-      stack.push(BigInt("0x" + word));
+      stack.unshift(result);
     }
+
+    // SUB
+    else if (opcode === 0x03) {
+      const a = stack.shift();
+      const b = stack.shift();
+      let result = a - b;
+      if (result < 0) {
+        result += MAX_UINT;
+      }
+
+      stack.unshift(result);
+    }
+
+    // DIV
+    else if (opcode === 0x04) {
+      const a = stack.shift();
+      const b = stack.shift();
+      let result = BigInt(0);
+      if (b != 0) {
+        result = a / b;
+      }
+
+      stack.unshift(result);
+    }
+
+    // MOD
+    else if (opcode === 0x06) {
+      const a = stack.shift();
+      const b = stack.shift();
+      let result = BigInt(0);
+      if (b != 0) {
+        result = a % b;
+      }
+
+      stack.unshift(result);
+    }
+
+    pc++;
   }
 
   return { success: true, stack };
