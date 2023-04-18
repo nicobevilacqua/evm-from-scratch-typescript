@@ -119,6 +119,60 @@ export default function evm(code: Uint8Array): Result {
       stack.unshift(result);
     }
 
+    // ADDMOD
+    else if (opcode === 0x08) {
+      const a = stack.shift();
+      const b = stack.shift();
+      const n = stack.shift();
+
+      let result = BigInt(0);
+      if (n != 0) {
+        result = (a + b) % n;
+      }
+
+      stack.unshift(result);
+    }
+
+    // MULMOD
+    else if (opcode === 0x09) {
+      const a = stack.shift();
+      const b = stack.shift();
+      const n = stack.shift();
+
+      let result = BigInt(0);
+      if (n != 0) {
+        result = (a * b) % n;
+      }
+
+      stack.unshift(result);
+    }
+
+    // EXP
+    else if (opcode === 0x0a) {
+      const a = stack.shift();
+      const b = stack.shift();
+      const result = a ** b;
+
+      stack.unshift(result);
+    }
+
+    // SIGNEXTEND
+    else if (opcode === 0x0b) {
+      // TODO
+    }
+
+    // SDIV
+    else if (opcode === 0x05) {
+      const a = stack.shift();
+      const b = stack.shift();
+      let result = BigInt(0);
+      if (b != 0) {
+        result = a / b;
+      }
+
+      stack.unshift(result);
+    }
+
     pc++;
   }
 
