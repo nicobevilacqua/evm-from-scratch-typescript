@@ -7,9 +7,18 @@ type Block = {
   coinbase: BigInt;
   timestamp: BigInt;
   difficulty: BigInt;
-  gasLimit: BigInt;
-  chainId: BigInt;
+  gaslimit: BigInt;
+  chainid: BigInt;
   basefee: BigInt;
+};
+
+type Transaction = {
+  gasprice: BigInt;
+  value: BigInt;
+  data: string;
+  from: BigInt;
+  to: BigInt;
+  origin: BigInt;
 };
 
 for (const t of tests as any) {
@@ -22,7 +31,7 @@ for (const t of tests as any) {
 
     const result = evm(
       hexStringToUint8Array(code.bin),
-      tx,
+      parseTransaction(tx),
       parseBlock(block),
       state
     );
@@ -44,8 +53,19 @@ function parseBlock(block: any = {}): Block {
     coinbase: BigInt(block.coinbase || 0),
     timestamp: BigInt(block.timestamp || 0),
     difficulty: BigInt(block.difficulty || 0),
-    gasLimit: BigInt(block.gasLimit || 0),
-    chainId: BigInt(block.chainId || 0),
+    gaslimit: BigInt(block.gaslimit || 0),
+    chainid: BigInt(block.chainid || 0),
     basefee: BigInt(block.basefee || 0),
+  };
+}
+
+function parseTransaction(tx: any = {}): Transaction {
+  return {
+    gasprice: BigInt(tx.gasprice || 0),
+    value: BigInt(tx.value || 0),
+    data: tx.data,
+    from: BigInt(tx.from || 0),
+    to: BigInt(tx.to || 0),
+    origin: BigInt(tx.origin || 0),
   };
 }

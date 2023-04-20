@@ -547,16 +547,17 @@ export default function evm(
 
     // GASLIMIT
     else if (opcode === OPCODES.GASLIMIT) {
-      stack.unshift(block.gasLimit);
+      stack.unshift(block.gaslimit);
     }
 
     // CHAINID
     else if (opcode === OPCODES.CHAINID) {
-      stack.unshift(block.chainId);
+      stack.unshift(block.chainid);
     }
 
     // BLOCKHASH
     else if (opcode === OPCODES.BLOCKHASH) {
+      const blocknumber = stack.shift()!;
       stack.unshift(ZERO);
     }
 
@@ -570,6 +571,26 @@ export default function evm(
     // CALLVALUE
     else if (opcode === OPCODES.CALLVALUE) {
       stack.unshift(BigInt(tx.value || 0));
+    }
+
+    // BASEFEE
+    else if (opcode === OPCODES.BASEFEE) {
+      stack.unshift(BigInt(block.basefee));
+    }
+
+    // GASPRICE
+    else if (opcode === OPCODES.GASPRICE) {
+      stack.unshift(BigInt(tx.gasprice));
+    }
+
+    // CALLER
+    else if (opcode === OPCODES.CALLER) {
+      stack.unshift(BigInt(tx.from));
+    }
+
+    // ORIGIN
+    else if (opcode === OPCODES.ORIGIN) {
+      stack.unshift(BigInt(tx.origin));
     }
 
     pc++;
