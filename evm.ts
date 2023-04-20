@@ -107,11 +107,25 @@ enum OPCODES {
   REVERT = 0xfd,
   SELFDESTRUCT = 0xff,
   INVALID = 0xfe,
+  BLOCKHASH = 0x40,
 }
 
-export default function evm(code: Uint8Array): Result {
+export default function evm(
+  code: Uint8Array,
+  tx: any,
+  block: Block,
+  state: any
+): Result {
   let pc = 0;
   let stack: bigint[] = [];
+  let memory: string = "";
+
+  function mload(offset: BigInt): BigInt {
+    // memory.slice(offset, 32)
+    // BigInt("0b" + a.toString(2).padStart(256, "0"));
+  }
+
+  function mstore(offset: BigInt, value: BigInt) {}
 
   while (pc < code.length) {
     const opcode = code[pc];
@@ -509,6 +523,53 @@ export default function evm(code: Uint8Array): Result {
         }
         pc = counter;
       }
+    }
+
+    // COINBASE
+    else if (opcode === OPCODES.COINBASE) {
+      stack.unshift(block.coinbase);
+    }
+
+    // TIMESTAMP
+    else if (opcode === OPCODES.TIMESTAMP) {
+      stack.unshift(block.timestamp);
+    }
+
+    // NUMBER
+    else if (opcode === OPCODES.NUMBER) {
+      stack.unshift(block.number);
+    }
+
+    // DIFFICULTY
+    else if (opcode === OPCODES.DIFFICULTY) {
+      stack.unshift(block.difficulty);
+    }
+
+    // GASLIMIT
+    else if (opcode === OPCODES.GASLIMIT) {
+      stack.unshift(block.gasLimit);
+    }
+
+    // CHAINID
+    else if (opcode === OPCODES.CHAINID) {
+      stack.unshift(block.chainId);
+    }
+
+    // BLOCKHASH
+    else if (opcode === OPCODES.BLOCKHASH) {
+      stack.unshift(ZERO);
+    }
+
+    // BALANCE
+    else if (opcode === OPCODES.BALANCE) {
+      const address = stack.shift()!;
+      const { balance = 0 } = state[address] || {};
+      stack.unshift(BigInt(balance));
+    }
+
+    // CALLVALUE
+    else if (opcode === OPCODES.CALLVALUE) {
+      stack.unshift(BigInt(tx.value || 0));
     }
 
     pc++;
